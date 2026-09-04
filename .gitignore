@@ -1,0 +1,12 @@
+# Credenciales
+.env
+
+# Entorno y caches
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Artefactos generados
+chroma_db/
+logs/
