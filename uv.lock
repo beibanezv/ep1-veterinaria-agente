@@ -594,7 +594,7 @@ wheels = [
 ]
 
 [[package]]
-name = "ep1-veterinaria-dosis-seguras"
+name = "ep1-veterinaria-agente"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [

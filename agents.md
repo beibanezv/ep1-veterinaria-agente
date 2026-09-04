@@ -1,6 +1,6 @@
 # agents.md — Memoria de decisiones y avance del semestre
 
-**Proyecto:** ep1-veterinaria-dosis-seguras
+**Proyecto:** ep1-veterinaria-agente
 **Curso:** ISY0101 Ingeniería de Soluciones con IA — Evaluación Parcial 1 (30%)
 **GitHub:** https://github.com/beibanezv
 **Última actualización:** 2026-09-03
@@ -14,7 +14,7 @@
 - EP1 = 1 caso organizacional + informe de 5 páginas APA (IE1–IE9, pauta en
   `../EP1_ISY0101_Estudiante.pdf`). Se desarrolla en parejas, 5 semanas.
 - Estrategia del equipo: construir DOS prototipos con arquitectura base común
-  (este y `../ep1-ecoturismo-replanner`), elegir el mejor como entregable
+  (este y `../ep1-ecoturismo-agente`), elegir el mejor como entregable
   único; el otro se descarta o se menciona en la presentación explicando por
   qué se eligió uno sobre el otro.
 - Regla del stack: **≥50% con tecnologías vistas en clase es concepto guía,
@@ -31,7 +31,7 @@
 | D4 | Chunking | Documentos cortos casi sin chunking; `RecursiveCharacterTextSplitter`-style 500/50 para lo largo | Visto en RA1/IL1.3 (`2-text-chunking.py`); fichas y entradas de dosificación son pequeñas y deben recuperarse completas (seguridad) | Chunk grande genérico |
 | D5 | Gestor de deps | uv + Python 3.13 | Convención del curso (uv.lock en repo materiales) | pip |
 | D6 | Repos | Dos repos independientes | Superficie común ~100 líneas (`llm_client` + logger); entrega académica es por repo | Paquete `shared/`, monorepo |
-| D7 | Nombres | `ep1-veterinaria-dosis-seguras` | Distintivo en GitHub beibanezv (decenas de archivos similares); describe la función (dosis seguras) | `EP1-Veterinaria` |
+| D7 | Nombres | `ep1-veterinaria-agente` | Distintivo en GitHub beibanezv (decenas de archivos similares); describe la función (dosis seguras) | `EP1-Veterinaria` |
 | D8 | Orquestación | Loop razonamiento-acción propio (sin LangGraph/CrewAI) | Control total del logging de trazabilidad y de los guardrails de seguridad; la pauta pide mostrar el loop explícito | LangGraph (visto en curso; capa extra innecesaria para 1 agente) |
 
 ## 3. Requisitos funcionales (encargo)
@@ -57,7 +57,7 @@ prompt.
 ## 4. Estructura
 
 ```
-ep1-veterinaria-dosis-seguras/
+ep1-veterinaria-agente/
 ├── data/
 │   ├── internal/fichas/          (10-12 fichas clínicas .json)
 │   └── external/dosificacion/    (15-20 entradas .json: especie, fármaco,

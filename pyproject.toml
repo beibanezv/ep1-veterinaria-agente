@@ -1,5 +1,5 @@
 [project]
-name = "ep1-veterinaria-dosis-seguras"
+name = "ep1-veterinaria-agente"
 version = "0.1.0"
 description = "EP1 ISY0101 - Agente RAG que asiste el cálculo de dosis veterinarias seguras y detección de interacciones"
 readme = "README.md"
