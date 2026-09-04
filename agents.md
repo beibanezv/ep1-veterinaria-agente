@@ -34,6 +34,8 @@
 | D7 | Nombres | `ep1-veterinaria-agente` | Distintivo en GitHub beibanezv (decenas de archivos similares); describe la función (dosis seguras) | `EP1-Veterinaria` |
 | D8 | Orquestación | Loop razonamiento-acción propio (sin LangGraph/CrewAI) | Control total del logging de trazabilidad y de los guardrails de seguridad; la pauta pide mostrar el loop explícito | LangGraph (visto en curso; capa extra innecesaria para 1 agente) |
 
+Convencion de commits: mensajes simples y en espanol durante todo el semestre.
+
 ## 3. Requisitos funcionales (encargo)
 
 Clínica veterinaria pequeña, sin especialista de respaldo, necesita apoyo para
