@@ -3,7 +3,7 @@
 **Proyecto:** ep1-veterinaria-agente
 **Curso:** ISY0101 Ingeniería de Soluciones con IA — Evaluación Parcial 1 (30%)
 **GitHub:** https://github.com/beibanezv
-**Última actualización:** 2026-09-03
+**Última actualización:** 2026-09-04
 
 > Memoria técnica del proyecto. Se actualiza en cada sesión para preservar
 > decisiones, tradeoffs y avance entre entregas. Sirve de bitácora para el
@@ -61,21 +61,23 @@ prompt.
 ```
 ep1-veterinaria-agente/
 ├── data/
-│   ├── internal/fichas/          (10-12 fichas clínicas .json)
-│   └── external/dosificacion/    (15-20 entradas .json: especie, fármaco,
-│                                  mg/kg, rango seguro, fuente bibliográfica)
-├── ingestion/ingest.py           carga → chunk → embed → Chroma
+│   ├── internal/fichas/          (12 fichas clínicas .json: FIC-001..012)
+│   ├── external/dosificacion/    (18 entradas .json: DOS-001..018 con
+│   │                              mg/kg, rango seguro, fuente bibliográfica)
+│   └── external/interacciones.json (8 pares fármaco con severidad y nota)
+├── ingestion/ingest.py           carga → chunk → embed → Chroma (30 docs)
 ├── agent/
 │   ├── llm_client.py             interfaz intercambiable, Groq default
-│   ├── reasoning_loop.py         loop razonamiento-acción (máx N pasos)
+│   ├── reasoning_loop.py         loop razonamiento-acción + guardrails post-LLM
 │   ├── prompts.py
 │   └── trace.py                  log JSONL de trazabilidad
 ├── tools/
 │   ├── dose_calculator.py        mg/kg × peso → rango, validado vs fuente
 │   └── interaction_checker.py    cruza medicamento propuesto vs actuales
 ├── main.py                       CLI: caso → recomendación con cita o alerta
+├── notebooks/demo.ipynb          4 casos de demostración con ClienteFalso
 ├── tests/
-│   ├── eval_dataset.json         12-15 casos con resultado esperado
+│   ├── eval_dataset.json         14 casos con resultado esperado
 │   └── eval_agent.py             corre evals y reporta % de aciertos
 └── docs/                         informe y diagramas (Fase 6)
 ```
@@ -83,12 +85,12 @@ ep1-veterinaria-agente/
 ## 5. Plan de fases
 
 - [x] Fase 0 — Scaffold: uv, pyproject, .env.example, verify_groq.py, git init
-- [ ] Fase 1 — Datos simulados (10-12 fichas + 15-20 entradas dosificación) + ingesta + índice Chroma
-- [ ] Fase 2 — llm_client.py + prompts + respuesta base con citas
-- [ ] Fase 3 — Tools dosis/interacciones + loop razonamiento-acción + trace.jsonl
-- [ ] Fase 4 — Guardrails de seguridad (negativa sin fuente, alertas)
-- [ ] Fase 5 — Evals: 12-15 casos (≥3 alerta, ≥2 "sin información suficiente"), meta ≥85% aciertos
-- [ ] Fase 6 — README completo + diagrama Mermaid + docs/informe
+- [x] Fase 1 — Datos simulados (12 fichas + 18 entradas dosificación + 8 interacciones) + ingesta + índice Chroma (30 docs, verificación 6/6)
+- [x] Fase 2 — llm_client.py + prompts veterinarios + respuesta base con citas [F#]/[T#]
+- [x] Fase 3 — Tools dosis/interacciones + loop razonamiento-acción + trace.jsonl (tests 7/7)
+- [x] Fase 4 — Guardrails en código: negativa sin fuente reemplaza texto del LLM; alerta severa anteponida (tests 11/11)
+- [x] Fase 5 — Evals: 14 casos (4 alertas, 4 sin información suficiente), 14/14 = 100% ≥ meta 85%
+- [x] Fase 6 — README completo + diagrama Mermaid + CLI + notebooks/demo.ipynb
 
 ## 6. Limitaciones conocidas
 
@@ -104,3 +106,11 @@ ep1-veterinaria-agente/
   ChromaDB elegido sobre FAISS (D3) tras relajar la regla del 50% a concepto
   guía. Guardrail de seguridad definido como código, no solo prompt. Scaffold
   completado (Fase 0).
+- **2026-09-04** — Fases 1–6 completadas en una sesión. Datos con huecos
+  deliberados (carprofeno-gato, amoxicilina-conejo) para probar el guardrail
+  de negativa. Guardrails implementados post-LLM en código (Fase 4): la
+  negativa REEMPLAZA la salida del LLM (cero riesgo de cifra inventada) y la
+  alerta severa se antepone al texto final. Metadata de Chroma guarda
+  medicamentos como string CSV (Chroma no acepta listas). Evals 14/14 (100%)
+  con ClienteFalso para reproducibilidad sin cuota. Decisiones del prototipo
+  gemelo (`ep1-ecoturismo-agente`) compartidas D1–D8.
