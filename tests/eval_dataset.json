@@ -1,0 +1,229 @@
+{
+  "meta": 0.85,
+  "casos": [
+    {
+      "id": "E01",
+      "consulta": "perro con dolor articular",
+      "especie": "perro",
+      "peso_kg": 24.5,
+      "farmaco": "carprofeno",
+      "paciente": "FIC-001",
+      "esperado": {
+        "ficha_id": "FIC-001",
+        "entrada_id": "DOS-001",
+        "sin_informacion": false,
+        "alerta_severa": true,
+        "dosis_min_mg": 49.0,
+        "dosis_max_mg": 107.8,
+        "guardrails_contiene": ["alerta_severa_anteponida"],
+        "citas_contiene": ["FIC-001", "DOS-001", "interacciones.json (interno)"]
+      }
+    },
+    {
+      "id": "E02",
+      "consulta": "perro con infeccion bacteriana",
+      "especie": "perro",
+      "peso_kg": 32.0,
+      "farmaco": "amoxicilina",
+      "paciente": "FIC-004",
+      "esperado": {
+        "ficha_id": "FIC-004",
+        "entrada_id": "DOS-003",
+        "sin_informacion": false,
+        "alerta_severa": false,
+        "dosis_min_mg": 320.0,
+        "dosis_max_mg": 640.0
+      }
+    },
+    {
+      "id": "E03",
+      "consulta": "gata con dolor leve",
+      "especie": "gato",
+      "peso_kg": 4.2,
+      "farmaco": "meloxicam",
+      "paciente": "FIC-002",
+      "esperado": {
+        "ficha_id": "FIC-002",
+        "entrada_id": "DOS-008",
+        "sin_informacion": false,
+        "alerta_severa": false,
+        "dosis_min_mg": 0.2,
+        "dosis_max_mg": 0.4
+      }
+    },
+    {
+      "id": "E04",
+      "consulta": "conejo con infeccion respiratoria",
+      "especie": "conejo",
+      "peso_kg": 2.1,
+      "farmaco": "enrofloxacina",
+      "paciente": "FIC-003",
+      "esperado": {
+        "ficha_id": "FIC-003",
+        "entrada_id": "DOS-014",
+        "sin_informacion": false,
+        "alerta_severa": false,
+        "dosis_min_mg": 10.5,
+        "dosis_max_mg": 31.5
+      }
+    },
+    {
+      "id": "E05",
+      "consulta": "perro con inflamacion cronica",
+      "especie": "perro",
+      "peso_kg": 38.5,
+      "farmaco": "meloxicam",
+      "paciente": "FIC-008",
+      "esperado": {
+        "ficha_id": "FIC-008",
+        "entrada_id": "DOS-002",
+        "sin_informacion": false,
+        "alerta_severa": true,
+        "dosis_min_mg": 3.5,
+        "dosis_max_mg": 6.9,
+        "guardrails_contiene": ["alerta_severa_anteponida"]
+      }
+    },
+    {
+      "id": "E06",
+      "consulta": "gata con infeccion",
+      "especie": "gato",
+      "peso_kg": 3.2,
+      "farmaco": "doxiciclina",
+      "paciente": "FIC-009",
+      "esperado": {
+        "ficha_id": "FIC-009",
+        "entrada_id": "DOS-010",
+        "sin_informacion": false,
+        "alerta_severa": false,
+        "dosis_min_mg": 16.0,
+        "dosis_max_mg": 32.0
+      }
+    },
+    {
+      "id": "E07",
+      "consulta": "perro senior con dolor",
+      "especie": "perro",
+      "peso_kg": 12.3,
+      "farmaco": "carprofeno",
+      "paciente": "FIC-011",
+      "esperado": {
+        "ficha_id": "FIC-011",
+        "entrada_id": "DOS-001",
+        "sin_informacion": false,
+        "alerta_severa": false,
+        "dosis_min_mg": 24.6,
+        "dosis_max_mg": 54.1
+      }
+    },
+    {
+      "id": "E08",
+      "consulta": "gato con dolor articular",
+      "especie": "gato",
+      "peso_kg": 5.8,
+      "farmaco": "carprofeno",
+      "paciente": "FIC-005",
+      "esperado": {
+        "ficha_id": "FIC-005",
+        "entrada_id": null,
+        "sin_informacion": true,
+        "alerta_severa": false,
+        "guardrails_contiene": ["negativa_sin_informacion"],
+        "texto_contiene": ["No tengo informacion suficiente"]
+      }
+    },
+    {
+      "id": "E09",
+      "consulta": "conejo con infeccion bacteriana",
+      "especie": "conejo",
+      "peso_kg": 1.8,
+      "farmaco": "amoxicilina",
+      "paciente": "FIC-006",
+      "esperado": {
+        "ficha_id": "FIC-006",
+        "entrada_id": null,
+        "sin_informacion": true,
+        "alerta_severa": false,
+        "guardrails_contiene": ["negativa_sin_informacion"]
+      }
+    },
+    {
+      "id": "E10",
+      "consulta": "perro con parasitos",
+      "especie": "perro",
+      "peso_kg": 24.5,
+      "farmaco": "ivermectina",
+      "paciente": "FIC-012",
+      "esperado": {
+        "ficha_id": "FIC-012",
+        "entrada_id": null,
+        "sin_informacion": true,
+        "alerta_severa": false,
+        "guardrails_contiene": ["negativa_sin_informacion"]
+      }
+    },
+    {
+      "id": "E11",
+      "consulta": "conejo con infeccion severa",
+      "especie": "conejo",
+      "peso_kg": 1.8,
+      "farmaco": "gentamicina",
+      "paciente": "FIC-006",
+      "esperado": {
+        "ficha_id": "FIC-006",
+        "entrada_id": null,
+        "sin_informacion": true,
+        "alerta_severa": false,
+        "alertas_minimo": 1,
+        "guardrails_contiene": ["negativa_sin_informacion"]
+      }
+    },
+    {
+      "id": "E12",
+      "consulta": "gata con protector gastrico",
+      "especie": "gato",
+      "peso_kg": 3.2,
+      "farmaco": "cimetidina",
+      "paciente": "FIC-009",
+      "esperado": {
+        "ficha_id": "FIC-009",
+        "entrada_id": null,
+        "sin_informacion": true,
+        "alerta_severa": false,
+        "alertas_minimo": 1
+      }
+    },
+    {
+      "id": "E13",
+      "consulta": "perro con alergia cutanea",
+      "especie": "perro",
+      "peso_kg": 32.0,
+      "farmaco": "prednisolona",
+      "paciente": "FIC-004",
+      "esperado": {
+        "ficha_id": "FIC-004",
+        "entrada_id": "DOS-007",
+        "sin_informacion": false,
+        "alerta_severa": false,
+        "dosis_min_mg": 16.0,
+        "dosis_max_mg": 32.0
+      }
+    },
+    {
+      "id": "E14",
+      "consulta": "coneja con dolor cronico",
+      "especie": "conejo",
+      "peso_kg": 2.4,
+      "farmaco": "meloxicam",
+      "paciente": "FIC-010",
+      "esperado": {
+        "ficha_id": "FIC-010",
+        "entrada_id": "DOS-015",
+        "sin_informacion": false,
+        "alerta_severa": false,
+        "dosis_min_mg": 1.2,
+        "dosis_max_mg": 3.6
+      }
+    }
+  ]
+}
