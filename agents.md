@@ -3,7 +3,7 @@
 **Proyecto:** ep1-veterinaria-agente
 **Curso:** ISY0101 Ingeniería de Soluciones con IA — Evaluación Parcial 1 (30%)
 **GitHub:** https://github.com/beibanezv
-**Última actualización:** 2026-09-04
+**Última actualización:** 2026-09-05
 
 > Memoria técnica del proyecto. Se actualiza en cada sesión para preservar
 > decisiones, tradeoffs y avance entre entregas. Sirve de bitácora para el
@@ -115,4 +115,13 @@ ep1-veterinaria-agente/
   con ClienteFalso para reproducibilidad sin cuota. Decisiones del prototipo
   gemelo (`ep1-ecoturismo-agente`) compartidas D1–D8.
 
-- **2026-09-04** " Informe de 5 p" + [char]0xE1 + "ginas APA entregado (docs/EP1_ISY0101_Informe.docx) y guion de demostraci" + [char]0xF3 + "n definido para la presentaci" + [char]0xF3 + "n: 4 casos CLI con --pasos --falso en este repo (FIC-001+carprofeno con alerta severa; FIC-005+carprofeno con negativa sin informaci" + [char]0xF3 + "n), suite pytest 11/11 y evals 14/14 como evidencia cuantitativa. Comandos de demo probados: & \".venv\Scripts\python.exe\" main.py \"perro con dolor articular\" --especie perro --peso 24.5 --farmaco carprofeno --paciente FIC-001 --pasos --falso y & \".venv\Scripts\python.exe\" main.py \"gato con dolor\" --especie gato --peso 5.8 --farmaco carprofeno --paciente FIC-005 --pasos --falso. Portada del informe con placeholders de nombres pendientes de completar."@
+- **2026-09-04** — Informe de 5 páginas APA entregado (`docs/EP1_ISY0101_Informe.docx`,
+  también en el repo ecoturismo y en la raíz del workspace; portada con
+  placeholders `[Integrante 1/2]` y `[Nombre del docente]` pendientes).
+- **2026-09-05** — Guion de demo para la presentación (probado en desarrollo).
+  Todo con `--falso` (ClienteFalso determinista, sin cuota ni API key):
+  1. `& ".venv\Scripts\python.exe" main.py "perro con dolor articular" --especie perro --peso 24.5 --farmaco carprofeno --paciente FIC-001 --pasos --falso` → ALERTA DE INTERACCION SEVERA (carprofeno+meloxicam) + dosis 49.0-107.8 mg.
+  2. `& ".venv\Scripts\python.exe" main.py "gato con dolor" --especie gato --peso 5.8 --farmaco carprofeno --paciente FIC-005 --pasos --falso` → negativa "No tengo informacion suficiente" (guardrail; carprofeno-gato no existe en la guía).
+  3. `& ".venv\Scripts\python.exe" -m pytest -q` → 11/11 y `& ".venv\Scripts\python.exe" -m tests.eval_agent` → 14/14 (100%) como evidencia cuantitativa.
+  `--pasos` muestra el trace de la corrida (trazabilidad en vivo). Los casos del
+  prototipo ecoturismo están en el agents.md del repo gemelo.
