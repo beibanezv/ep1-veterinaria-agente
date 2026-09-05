@@ -99,6 +99,7 @@ def construir_indice() -> tuple[int, int]:
                 "especie": f["especie"],
                 "raza": f["raza"],
                 "peso_kg": f["peso_kg"],
+                "medicamentos": ",".join(f["medicamentos_actuales"]),
                 "chunk_index": i,
             })
 
