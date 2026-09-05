@@ -1,0 +1,14 @@
+{
+  "id": "FIC-006",
+  "paciente": "Bonito",
+  "especie": "conejo",
+  "raza": "rex",
+  "peso_kg": 1.8,
+  "edad_anios": 4,
+  "medicamentos_actuales": [
+    "enrofloxacina"
+  ],
+  "alergias": [],
+  "resumen": "En tratamiento por absceso subcutaneo en el cuello con enrofloxacina desde hace cinco dias.",
+  "texto": "Ficha clinica de Bonito (conejo, raza rex, 1.8 kg, 4 años). En tratamiento por absceso subcutaneo en el cuello con enrofloxacina desde hace cinco dias. Medicamentos actuales: enrofloxacina. Alergias registradas: ninguna."
+}

@@ -1,0 +1,14 @@
+{
+  "id": "FIC-008",
+  "paciente": "Max",
+  "especie": "perro",
+  "raza": "pastor aleman",
+  "peso_kg": 38.5,
+  "edad_anios": 8,
+  "medicamentos_actuales": [
+    "prednisolona"
+  ],
+  "alergias": [],
+  "resumen": "En tratamiento por dermatitis alergica con prednisolona. Dueño consulta por lamerse excesivamente.",
+  "texto": "Ficha clinica de Max (perro, raza pastor aleman, 38.5 kg, 8 años). En tratamiento por dermatitis alergica con prednisolona. Dueño consulta por lamerse excesivamente. Medicamentos actuales: prednisolona. Alergias registradas: ninguna."
+}

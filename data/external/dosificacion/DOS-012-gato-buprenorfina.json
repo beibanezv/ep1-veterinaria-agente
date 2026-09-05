@@ -1,0 +1,12 @@
+{
+  "id": "DOS-012",
+  "especie": "gato",
+  "farmaco": "buprenorfina",
+  "dosis_mg_por_kg_min": 0.01,
+  "dosis_mg_por_kg_max": 0.02,
+  "frecuencia_horas": 8,
+  "via": "inyectable",
+  "nota": "Analgesico opioide de uso felino; frecuencia 6 a 12 horas.",
+  "fuente_bibliografica": "Plumb's Veterinary Drug Handbook (referencia curada para el prototipo)",
+  "texto": "Entrada de dosificacion para gato: farmaco buprenorfina, via inyectable, dosis de 0.01 a 0.02 mg por kg, cada 8 horas. Analgesico opioide de uso felino; frecuencia 6 a 12 horas. Fuente: Plumb's Veterinary Drug Handbook (referencia curada para el prototipo)."
+}

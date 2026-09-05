@@ -1,0 +1,14 @@
+{
+  "id": "FIC-001",
+  "paciente": "Firulais",
+  "especie": "perro",
+  "raza": "mestizo",
+  "peso_kg": 24.5,
+  "edad_anios": 7,
+  "medicamentos_actuales": [
+    "meloxicam"
+  ],
+  "alergias": [],
+  "resumen": "Paciente estable, control anual vigente. Dueño consulta por cojera leve de la pata trasera derecha tras paseos largos.",
+  "texto": "Ficha clinica de Firulais (perro, raza mestizo, 24.5 kg, 7 años). Paciente estable, control anual vigente. Dueño consulta por cojera leve de la pata trasera derecha tras paseos largos. Medicamentos actuales: meloxicam. Alergias registradas: ninguna."
+}

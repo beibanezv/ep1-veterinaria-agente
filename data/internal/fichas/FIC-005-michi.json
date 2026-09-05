@@ -1,0 +1,14 @@
+{
+  "id": "FIC-005",
+  "paciente": "Michi",
+  "especie": "gato",
+  "raza": "mestizo",
+  "peso_kg": 5.8,
+  "edad_anios": 9,
+  "medicamentos_actuales": [
+    "carprofeno"
+  ],
+  "alergias": [],
+  "resumen": "Paciente adulto mayor con artrosis diagnosticada. Recibio carprofeno recetado por otro veterinario.",
+  "texto": "Ficha clinica de Michi (gato, raza mestizo, 5.8 kg, 9 años). Paciente adulto mayor con artrosis diagnosticada. Recibio carprofeno recetado por otro veterinario. Medicamentos actuales: carprofeno. Alergias registradas: ninguna."
+}

@@ -1,0 +1,12 @@
+{
+  "id": "DOS-002",
+  "especie": "perro",
+  "farmaco": "meloxicam",
+  "dosis_mg_por_kg_min": 0.09,
+  "dosis_mg_por_kg_max": 0.18,
+  "frecuencia_horas": 24,
+  "via": "oral",
+  "nota": "Dosis inicial 0.18 mg/kg el primer dia, luego 0.09 mg/kg de mantenimiento.",
+  "fuente_bibliografica": "Plumb's Veterinary Drug Handbook (referencia curada para el prototipo)",
+  "texto": "Entrada de dosificacion para perro: farmaco meloxicam, via oral, dosis de 0.09 a 0.18 mg por kg, cada 24 horas. Dosis inicial 0.18 mg/kg el primer dia, luego 0.09 mg/kg de mantenimiento. Fuente: Plumb's Veterinary Drug Handbook (referencia curada para el prototipo)."
+}

@@ -1,0 +1,12 @@
+{
+  "id": "DOS-017",
+  "especie": "conejo",
+  "farmaco": "ivermectina",
+  "dosis_mg_por_kg_min": 0.2,
+  "dosis_mg_por_kg_max": 0.4,
+  "frecuencia_horas": 336,
+  "via": "inyectable",
+  "nota": "Antiparasitario; repetir cada 7 a 14 dias segun indicacion.",
+  "fuente_bibliografica": "Plumb's Veterinary Drug Handbook (referencia curada para el prototipo)",
+  "texto": "Entrada de dosificacion para conejo: farmaco ivermectina, via inyectable, dosis de 0.2 a 0.4 mg por kg, cada 336 horas. Antiparasitario; repetir cada 7 a 14 dias segun indicacion. Fuente: Plumb's Veterinary Drug Handbook (referencia curada para el prototipo)."
+}

@@ -1,0 +1,50 @@
+[
+  {
+    "farmaco_a": "carprofeno",
+    "farmaco_b": "meloxicam",
+    "severidad": "severa",
+    "nota": "Dos AINEs simultaneos elevan el riesgo de ulcera gastrointestinal y dano renal."
+  },
+  {
+    "farmaco_a": "meloxicam",
+    "farmaco_b": "prednisolona",
+    "severidad": "severa",
+    "nota": "AINE mas corticosteroide: riesgo de ulcera gastrointestinal; evitar combinacion."
+  },
+  {
+    "farmaco_a": "carprofeno",
+    "farmaco_b": "prednisolona",
+    "severidad": "severa",
+    "nota": "AINE mas corticosteroide: riesgo de ulcera gastrointestinal; evitar combinacion."
+  },
+  {
+    "farmaco_a": "enrofloxacina",
+    "farmaco_b": "gentamicina",
+    "severidad": "moderada",
+    "nota": "Riesgo de nefrotoxicidad acumulativa; monitorizar funcion renal."
+  },
+  {
+    "farmaco_a": "doxiciclina",
+    "farmaco_b": "sucralfato",
+    "severidad": "moderada",
+    "nota": "El sucralfato reduce la absorcion de doxiciclina; separar 2 horas."
+  },
+  {
+    "farmaco_a": "tramadol",
+    "farmaco_b": "fluoxetina",
+    "severidad": "moderada",
+    "nota": "Riesgo de sindrome serotoninergico; vigilancia estrecha."
+  },
+  {
+    "farmaco_a": "buprenorfina",
+    "farmaco_b": "diazepam",
+    "severidad": "moderada",
+    "nota": "Depresion del sistema nervioso central aditiva."
+  },
+  {
+    "farmaco_a": "metronidazol",
+    "farmaco_b": "cimetidina",
+    "severidad": "leve",
+    "nota": "La cimetidina puede aumentar la concentracion de metronidazol."
+  }
+]

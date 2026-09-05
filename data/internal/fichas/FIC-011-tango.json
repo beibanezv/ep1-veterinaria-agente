@@ -1,0 +1,14 @@
+{
+  "id": "FIC-011",
+  "paciente": "Tango",
+  "especie": "perro",
+  "raza": "beagle",
+  "peso_kg": 12.3,
+  "edad_anios": 10,
+  "medicamentos_actuales": [
+    "levotiroxina"
+  ],
+  "alergias": [],
+  "resumen": "Hipotiroidismo controlado con levotiroxina. Dueña consulta por nodulo en la piel del lomo.",
+  "texto": "Ficha clinica de Tango (perro, raza beagle, 12.3 kg, 10 años). Hipotiroidismo controlado con levotiroxina. Dueña consulta por nodulo en la piel del lomo. Medicamentos actuales: levotiroxina. Alergias registradas: ninguna."
+}

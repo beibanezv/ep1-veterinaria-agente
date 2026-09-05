@@ -1,0 +1,14 @@
+{
+  "id": "FIC-012",
+  "paciente": "Violeta",
+  "especie": "perro",
+  "raza": "poodle",
+  "peso_kg": 6.8,
+  "edad_anios": 12,
+  "medicamentos_actuales": [
+    "enalapril"
+  ],
+  "alergias": [],
+  "resumen": "Insuficiencia cardiaca compensada con enalapril. Dueña consulta por tartalear al caminar.",
+  "texto": "Ficha clinica de Violeta (perro, raza poodle, 6.8 kg, 12 años). Insuficiencia cardiaca compensada con enalapril. Dueña consulta por tartalear al caminar. Medicamentos actuales: enalapril. Alergias registradas: ninguna."
+}

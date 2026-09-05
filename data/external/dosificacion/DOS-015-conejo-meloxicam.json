@@ -1,0 +1,12 @@
+{
+  "id": "DOS-015",
+  "especie": "conejo",
+  "farmaco": "meloxicam",
+  "dosis_mg_por_kg_min": 0.5,
+  "dosis_mg_por_kg_max": 1.5,
+  "frecuencia_horas": 24,
+  "via": "oral",
+  "nota": "Dosis considerablemente mayor que en perros; frecuencia 12 a 24 horas.",
+  "fuente_bibliografica": "Plumb's Veterinary Drug Handbook (referencia curada para el prototipo)",
+  "texto": "Entrada de dosificacion para conejo: farmaco meloxicam, via oral, dosis de 0.5 a 1.5 mg por kg, cada 24 horas. Dosis considerablemente mayor que en perros; frecuencia 12 a 24 horas. Fuente: Plumb's Veterinary Drug Handbook (referencia curada para el prototipo)."
+}

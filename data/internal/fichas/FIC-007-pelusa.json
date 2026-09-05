@@ -1,0 +1,14 @@
+{
+  "id": "FIC-007",
+  "paciente": "Pelusa",
+  "especie": "gato",
+  "raza": "persa",
+  "peso_kg": 3.9,
+  "edad_anios": 6,
+  "medicamentos_actuales": [],
+  "alergias": [
+    "penicilinas"
+  ],
+  "resumen": "Paciente sana. Antecedente de reaccion cutanea con penicilinas. Dueña consulta por pelo enredado.",
+  "texto": "Ficha clinica de Pelusa (gato, raza persa, 3.9 kg, 6 años). Paciente sana. Antecedente de reaccion cutanea con penicilinas. Dueña consulta por pelo enredado. Medicamentos actuales: ninguno. Alergias registradas: penicilinas."
+}

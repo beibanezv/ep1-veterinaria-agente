@@ -1,0 +1,12 @@
+{
+  "id": "FIC-010",
+  "paciente": "Canela",
+  "especie": "conejo",
+  "raza": "belier",
+  "peso_kg": 2.4,
+  "edad_anios": 1,
+  "medicamentos_actuales": [],
+  "alergias": [],
+  "resumen": "Paciente joven y estable. Vacunacion al dia. Dueña consulta por crecimiento de uñas.",
+  "texto": "Ficha clinica de Canela (conejo, raza belier, 2.4 kg, 1 años). Paciente joven y estable. Vacunacion al dia. Dueña consulta por crecimiento de uñas. Medicamentos actuales: ninguno. Alergias registradas: ninguna."
+}

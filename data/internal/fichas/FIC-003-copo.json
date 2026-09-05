@@ -1,0 +1,12 @@
+{
+  "id": "FIC-003",
+  "paciente": "Copo",
+  "especie": "conejo",
+  "raza": "angora",
+  "peso_kg": 2.1,
+  "edad_anios": 2,
+  "medicamentos_actuales": [],
+  "alergias": [],
+  "resumen": "Paciente estable. Dueña consulta por pelo ingerido y heces menos frecuentes esta semana.",
+  "texto": "Ficha clinica de Copo (conejo, raza angora, 2.1 kg, 2 años). Paciente estable. Dueña consulta por pelo ingerido y heces menos frecuentes esta semana. Medicamentos actuales: ninguno. Alergias registradas: ninguna."
+}

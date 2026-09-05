@@ -1,0 +1,14 @@
+{
+  "id": "FIC-009",
+  "paciente": "Nala",
+  "especie": "gato",
+  "raza": "sphynx",
+  "peso_kg": 3.2,
+  "edad_anios": 4,
+  "medicamentos_actuales": [
+    "metronidazol"
+  ],
+  "alergias": [],
+  "resumen": "En tratamiento por diarrea intermitente con metronidazol. Dueña consulta por vomito esta mañana.",
+  "texto": "Ficha clinica de Nala (gato, raza sphynx, 3.2 kg, 4 años). En tratamiento por diarrea intermitente con metronidazol. Dueña consulta por vomito esta mañana. Medicamentos actuales: metronidazol. Alergias registradas: ninguna."
+}

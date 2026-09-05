@@ -1,0 +1,14 @@
+{
+  "id": "FIC-004",
+  "paciente": "Rocko",
+  "especie": "perro",
+  "raza": "labrador",
+  "peso_kg": 32.0,
+  "edad_anios": 5,
+  "medicamentos_actuales": [
+    "amoxicilina"
+  ],
+  "alergias": [],
+  "resumen": "En tratamiento por herida superficial en la pata delantera con amoxicilina desde hace dos dias.",
+  "texto": "Ficha clinica de Rocko (perro, raza labrador, 32.0 kg, 5 años). En tratamiento por herida superficial en la pata delantera con amoxicilina desde hace dos dias. Medicamentos actuales: amoxicilina. Alergias registradas: ninguna."
+}

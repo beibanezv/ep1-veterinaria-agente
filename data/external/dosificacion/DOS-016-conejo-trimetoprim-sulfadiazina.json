@@ -1,0 +1,12 @@
+{
+  "id": "DOS-016",
+  "especie": "conejo",
+  "farmaco": "trimetoprim-sulfadiazina",
+  "dosis_mg_por_kg_min": 15.0,
+  "dosis_mg_por_kg_max": 30.0,
+  "frecuencia_horas": 12,
+  "via": "oral",
+  "nota": "Antibiotico alternativo seguro en conejos.",
+  "fuente_bibliografica": "Plumb's Veterinary Drug Handbook (referencia curada para el prototipo)",
+  "texto": "Entrada de dosificacion para conejo: farmaco trimetoprim-sulfadiazina, via oral, dosis de 15.0 a 30.0 mg por kg, cada 12 horas. Antibiotico alternativo seguro en conejos. Fuente: Plumb's Veterinary Drug Handbook (referencia curada para el prototipo)."
+}
