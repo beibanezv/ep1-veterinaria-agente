@@ -6,7 +6,7 @@ Flujo por caso clinico:
 3. Calcular el rango mg/kg x peso (tool).
 4. Verificar interacciones farmaco propuesto vs medicamentos actuales (tool).
 5. LLM redacta la recomendacion citando [F#] y [T#].
-Fase 4 agregara guardrails en codigo sobre los flags sin_informacion/alerta_severa.
+6. Guardrails en codigo post-LLM (Fase 4): negativa sin fuente y alerta severa.
 """
 import re
 from dataclasses import dataclass, field
@@ -32,6 +32,43 @@ from tools.interaction_checker import (
 RAIZ = Path(__file__).resolve().parents[1]
 REGEX_FUENTES = re.compile(r"\[(?:F|T)\d+\]")
 
+TEXTO_SIN_INFORMACION = (
+    "No tengo informacion suficiente en la guia de dosificacion para esta "
+    "combinacion de especie y farmaco, por lo que no se entrega ninguna cifra "
+    "de dosis. Consulte la guia oficial vigente o a un profesional veterinario."
+)
+
+
+def _aplicar_guardrails(
+    texto: str,
+    sin_informacion: bool,
+    alerta_severa: bool,
+    interacciones: list[Interaccion],
+    farmaco: str,
+) -> tuple[str, list[str]]:
+    """Guardrails en codigo post-LLM (Fase 4): no se confia solo en el prompt.
+
+    - sin_informacion -> reemplaza el texto por una negativa sin cifras.
+    - alerta_severa -> antepone la alerta explicita a la respuesta final.
+    """
+    aplicados: list[str] = []
+    severas = [i for i in interacciones if i.severidad == "severa"]
+    encabezado = ""
+    if alerta_severa and severas:
+        notas = " ".join(
+            f"{i.farmaco_propuesto} + {i.farmaco_actual}: {i.nota}" for i in severas
+        )
+        encabezado = (
+            f"ALERTA DE INTERACCION SEVERA entre {farmaco} y los medicamentos "
+            f"actuales del paciente. {notas} No administrar sin supervision "
+            "veterinaria directa.\n\n"
+        )
+        aplicados.append("alerta_severa_anteponida")
+    if sin_informacion:
+        aplicados.append("negativa_sin_informacion")
+        return encabezado + TEXTO_SIN_INFORMACION, aplicados
+    return encabezado + texto, aplicados
+
 
 @dataclass
 class RespuestaVet:
@@ -41,6 +78,7 @@ class RespuestaVet:
     sin_informacion: bool = False
     alertas: list[str] = field(default_factory=list)
     alerta_severa: bool = False
+    guardrails: list[str] = field(default_factory=list)
     dosis: DosisCalculada | None = None
     fuentes_citadas: list[str] = field(default_factory=list)
     archivo_trace: Path | None = None
@@ -180,11 +218,19 @@ class AgenteVeterinario:
         fuentes = self._extraer_fuentes(r.texto)
         alertas = [i.nota for i in interacciones]
         alerta_severa = any(i.severidad == "severa" for i in interacciones)
+        texto_final, guardrails_aplicados = _aplicar_guardrails(
+            r.texto, sin_informacion, alerta_severa, interacciones, farmaco
+        )
+        if guardrails_aplicados:
+            self.trazador.registrar(
+                "guardrails_aplicados", reglas=guardrails_aplicados
+            )
         self.trazador.registrar(
             "respuesta_final",
             modelo=r.modelo,
             sin_informacion=sin_informacion,
             alerta_severa=alerta_severa,
+            guardrails=guardrails_aplicados,
             citas=fuentes,
         )
         fuentes_resueltas = []
@@ -196,12 +242,13 @@ class AgenteVeterinario:
             elif prefijo == "T" and idx <= len(resultados_tools):
                 fuentes_resueltas.append(resultados_tools[idx - 1][0])
         return RespuestaVet(
-            texto=r.texto,
+            texto=texto_final,
             ficha_id=ficha_id,
             entrada_id=entrada_id,
             sin_informacion=sin_informacion,
             alertas=alertas,
             alerta_severa=alerta_severa,
+            guardrails=guardrails_aplicados,
             dosis=dosis,
             fuentes_citadas=fuentes_resueltas or [f.fuente for f in fragmentos],
             archivo_trace=self.trazador.archivo,
