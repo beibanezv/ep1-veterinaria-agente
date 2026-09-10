@@ -87,9 +87,11 @@ class RespuestaVet:
 
 
 def _buscar_ficha(recuperador: Recuperador, consulta: str, paciente: str) -> tuple[Fragmento | None, str]:
-    filtro: dict = {"$and": [{"tipo": "ficha"}]}
+    condiciones = [{"tipo": "ficha"}]
     if paciente:
-        filtro["$and"].append({"paciente_id": paciente})
+        condiciones.append({"paciente_id": paciente})
+    # Chroma exige >=2 expresiones en $and: con una sola se pasa directa.
+    filtro: dict = {"$and": condiciones} if len(condiciones) > 1 else condiciones[0]
     resultados = recuperador.buscar(consulta, k=3, filtro=filtro)
     if paciente:
         for f in resultados:
