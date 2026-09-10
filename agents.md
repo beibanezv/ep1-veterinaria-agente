@@ -118,6 +118,11 @@ ep1-veterinaria-agente/
 - **2026-09-04** — Informe de 5 páginas APA entregado (`docs/EP1_ISY0101_Informe.docx`,
   también en el repo ecoturismo y en la raíz del workspace; portada con
   placeholders `[Integrante 1/2]` y `[Nombre del docente]` pendientes).
+- **2026-09-05 (2)** — UI básica Streamlit `app.py` solo para demo/presentación
+  (excepción a D9: CLI+notebook siguen siendo la entrega; la UI es un formulario
+  sobre `AgenteVeterinario.planificar()` con los 2 casos del guion precargados,
+  modo `--falso` por defecto y trazabilidad visible). Verificado: caso1 severa
+  49.0-107.8 mg, caso2 negativa sin información.
 - **2026-09-05** — Guion de demo para la presentación (probado en desarrollo).
   Todo con `--falso` (ClienteFalso determinista, sin cuota ni API key):
   1. `& ".venv\Scripts\python.exe" main.py "perro con dolor articular" --especie perro --peso 24.5 --farmaco carprofeno --paciente FIC-001 --pasos --falso` → ALERTA DE INTERACCION SEVERA (carprofeno+meloxicam) + dosis 49.0-107.8 mg.

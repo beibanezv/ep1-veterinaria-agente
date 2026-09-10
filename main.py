@@ -73,7 +73,8 @@ def main() -> int:
         medicamentos=medicamentos,
     )
 
-    print("--- RESPUESTA ---")
+    es_rechazo = "validacion_pre_loop" in (r.guardrails or [])
+    print("--- ENTRADA RECHAZADA (validación pre-loop, sin RAG/LLM) ---" if es_rechazo else "--- RESPUESTA ---")
     print(r.texto)
     print()
     print(f"Ficha:             {r.ficha_id or '(no recuperada)'}")
@@ -91,7 +92,7 @@ def main() -> int:
 
     if args.pasos:
         mostrar_trace(r.archivo_trace, omitir=lineas_previas)
-    return 0
+    return 2 if "validacion_pre_loop" in (r.guardrails or []) else 0
 
 
 if __name__ == "__main__":

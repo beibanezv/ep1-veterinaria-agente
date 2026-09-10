@@ -74,6 +74,14 @@ uv run python -m tests.eval_agent
 Notebook de demostración con 4 casos (alerta severa, dosis normal, negativa
 sin fuente, alerta moderada): `notebooks/demo.ipynb`.
 
+Interfaz web básica (Streamlit, solo para demo/presentación):
+
+```bash
+uv run streamlit run app.py
+# Marca "Modo demo determinista" para no usar API key; incluye los 2 casos
+# del guion (alerta severa FIC-001 y negativa gato+carprofeno) como botones.
+```
+
 ## Guardrails de seguridad (Fase 4, en código)
 
 Verificación post-LLM en `agent/reasoning_loop.py`, no solo en el prompt:
@@ -84,6 +92,30 @@ Verificación post-LLM en `agent/reasoning_loop.py`, no solo en el prompt:
 2. **Alerta severa anteponida:** si hay interacción severa, se antepone un
    encabezado `ALERTA DE INTERACCION SEVERA...` con la nota clínica y la
    advertencia de no administrar sin supervisión (`alerta_severa_anteponida`).
+
+## Validación pre-loop (Fase 5, bloqueante)
+
+Validación de entrada en `agent/validacion.py` que se ejecuta **antes** de
+cualquier RAG o llamada al LLM:
+
+1. **Especies permitidas:** `perro`, `gato`, `conejo`. Cualquier otro valor es
+   rechazado de inmediato.
+2. **Rangos de peso por especie (kg):**
+   - perro: `[0.1, 200.0]`
+   - gato: `[0.1, 50.0]`
+   - conejo: `[0.1, 10.0]`
+   Los pesos fuera del rango son rechazados.
+3. **Coherencia ficha-vs-input:** si se provee un ID de ficha `FIC-xxx` que
+   corresponde a otra especie, se rechaza para evitar mezclas (p. ej. FIC-001
+   es perro y no gato).
+4. **Fármaco obligatorio:** un farmaco vacío o nulo es rechazado.
+5. **Salida:** el agente devuelve un `RespuestaVet` con `sin_informacion=True`,
+   `guardrails=["validacion_pre_loop"]` y un mensaje de texto de rechazo sin
+   ejecutar RAG ni LLM. Esto evita costos innecesarios y protege contra
+   entradas que el agente no podría manejar con seguridad.
+
+La validación registra `entrada_rechazada` en el trace.jsonl para auditoría
+y permite diagnóstico inmediato sin lanzar herramientas.
 
 ## Evals (Fase 5)
 
@@ -103,3 +135,6 @@ Evals: 14/14 casos OK (100%) | meta >= 85%
   Handbook ni a la ficha técnica vigente. La salida es apoyo para un
   veterinario, no una prescripción.
 - Cuota Groq (200k tokens/día): usar `GROQ_MODEL_FAST` (20b) en dev y evals.
+- La validación pre-loop no reemplaza la supervisión veterinaria; evita que
+  el agente procese casos que no tiene datos para responder, pero el
+  profesional debe confirmar siempre la dosis.

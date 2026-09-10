@@ -1,12 +1,13 @@
 """Loop razonamiento-accion del agente veterinario (Fase 3).
 
 Flujo por caso clinico:
-1. Recuperar la ficha del paciente (RAG interno).
-2. Recuperar la entrada de dosificacion especie/farmaco (RAG externo curado).
-3. Calcular el rango mg/kg x peso (tool).
-4. Verificar interacciones farmaco propuesto vs medicamentos actuales (tool).
-5. LLM redacta la recomendacion citando [F#] y [T#].
-6. Guardrails en codigo post-LLM (Fase 4): negativa sin fuente y alerta severa.
+1. Validación pre-loop bloqueante (especie, peso, fármaco, coherencia ficha-vs-input).
+2. Recuperar la ficha del paciente (RAG interno).
+3. Recuperar la entrada de dosificacion especie/farmaco (RAG externo curado).
+4. Calcular el rango mg/kg x peso (tool).
+5. Verificar interacciones farmaco propuesto vs medicamentos actuales (tool).
+6. LLM redacta la recomendacion citando [F#] y [T#].
+7. Guardrails en codigo post-LLM (Fase 4): negativa sin fuente y alerta severa.
 """
 import re
 from dataclasses import dataclass, field
@@ -16,6 +17,7 @@ from agent.llm_client import ClienteLLM
 from agent.prompts import SISTEMA_BASE, armar_usuario
 from agent.retriever import Fragmento, Recuperador
 from agent.trace import Trazador
+from agent.validacion import ValidacionEntrada
 from tools.dose_calculator import (
     DosisCalculada,
     calcular_dosis,
@@ -130,6 +132,20 @@ class AgenteVeterinario:
         medicamentos: list[str] | None = None,
     ) -> RespuestaVet:
         medicamentos = list(medicamentos or [])
+
+        # Validación pre-loop bloqueante
+        rechazo = ValidacionEntrada.validar(
+            self, consulta, especie, peso_kg, farmaco, paciente, medicamentos
+        )
+        if rechazo is not None:
+            return rechazo
+
+        # Normalizar tras validar (la validación ya garantizó los rangos/formatos)
+        especie = (especie or "").strip().lower()
+        farmaco = (farmaco or "").strip()
+        paciente = (paciente or "").strip().upper()
+        peso_kg = float(peso_kg)  # type: ignore[arg-type]
+
         fragmentos: list[Fragmento] = []
         resultados_tools: list[tuple[str, str]] = []
         ficha_id = None
