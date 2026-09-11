@@ -3,7 +3,7 @@ name = "ep1-veterinaria-agente"
 version = "0.1.0"
 description = "EP1 ISY0101 - Agente RAG que asiste el cálculo de dosis veterinarias seguras y detección de interacciones"
 readme = "README.md"
-requires-python = ">=3.11"
+requires-python = ">=3.13"
 dependencies = [
     "groq>=0.11.0",
     "chromadb>=1.1.0",
@@ -11,6 +11,9 @@ dependencies = [
     "python-dotenv>=1.0.0",
     "pytest>=7.0.0",
     "streamlit>=1.30.0",
+    "langchain>=0.3.0",
+    "langchain-groq>=0.2.0",
+    "langsmith>=0.2.0",
 ]
 
 [tool.uv]

@@ -1,13 +1,19 @@
 """Recuperador RAG: consulta la coleccion 'conocimiento' de ChromaDB (Fase 1)."""
+import os
 from dataclasses import dataclass, field
 from pathlib import Path
 
 from chromadb import PersistentClient
 from chromadb.utils.embedding_functions import SentenceTransformerEmbeddingFunction
+from dotenv import load_dotenv
 
 RAIZ = Path(__file__).resolve().parents[1]
+load_dotenv(RAIZ / ".env")
 DIR_CHROMA = RAIZ / "chroma_db"
-MODELO_EMBEDDINGS = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
+MODELO_EMBEDDINGS = os.getenv(
+    "EMBEDDING_MODEL",
+    "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2",
+)
 
 
 @dataclass
@@ -23,7 +29,13 @@ class Recuperador:
     def __init__(self, coleccion: str = "conocimiento", dir_chroma: Path | None = None):
         ruta = dir_chroma or DIR_CHROMA
         ef = SentenceTransformerEmbeddingFunction(model_name=MODELO_EMBEDDINGS)
-        self._col = PersistentClient(path=str(ruta)).get_collection(coleccion, embedding_function=ef)
+        try:
+            self._col = PersistentClient(path=str(ruta)).get_collection(coleccion, embedding_function=ef)
+        except Exception as e:
+            raise RuntimeError(
+                f"No se encontró la colección '{coleccion}' en {ruta} "
+                f"(modelo={MODELO_EMBEDDINGS}). Ejecuta: uv run python -m ingestion.ingest"
+            ) from e
 
     def buscar(self, consulta: str, k: int = 4, filtro: dict | None = None) -> list[Fragmento]:
         r = self._col.query(

@@ -54,6 +54,31 @@ def test_guardrail_no_interviene_caso_normal(tmp_path):
     assert r.dosis.dosis_min_mg > 0
 
 
+def test_interaccion_no_severa_aparece_en_texto(tmp_path):
+    """Moderada/leve no debe perderse al reemplazar el texto por la negativa."""
+    r = _agente(tmp_path).planificar(
+        "conejo con infeccion severa", especie="conejo", peso_kg=1.8,
+        farmaco="gentamicina", paciente="FIC-006",
+    )
+    assert r.sin_informacion
+    assert "interacciones_no_severas_antepuestas" in r.guardrails
+    assert "INTERACCIONES A VIGILAR" in r.texto
+    assert "enrofloxacina" in r.texto and "gentamicina" in r.texto
+
+
+def test_validacion_rechaza_ficha_inexistente(tmp_path):
+    """Un FIC valido en formato pero inexistente no debe entregar dosis."""
+    r = _agente(tmp_path).planificar(
+        "perro con dolor articular", especie="perro", peso_kg=24.5,
+        farmaco="carprofeno", paciente="FIC-999",
+    )
+    assert "validacion_pre_loop" in r.guardrails
+    assert r.dosis is None
+    assert not r.alerta_severa
+    assert r.ficha_id == "FIC-999"
+    assert "no existe" in r.texto
+
+
 def test_guardrails_registrados_en_trace(tmp_path):
     _agente(tmp_path).planificar(
         "perro con artrosis que ya toma meloxicam", especie="perro", peso_kg=24.5,

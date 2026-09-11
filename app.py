@@ -15,9 +15,12 @@ from dotenv import load_dotenv
 RAIZ = Path(__file__).resolve().parent
 load_dotenv(RAIZ / ".env")
 
-from agent.llm_client import ClienteFalso, ClienteGroq
+from agent.llm_client import ClienteFalso, ClienteGroq, ClienteLangChain
+from agent.observabilidad import init_langsmith
 from agent.reasoning_loop import AgenteVeterinario
 from agent.trace import Trazador
+
+init_langsmith()
 
 DIR_FICHAS = RAIZ / "data" / "internal" / "fichas"
 DIR_DOSIS = RAIZ / "data" / "external" / "dosificacion"
@@ -62,6 +65,7 @@ def cargar_ficha(paciente_id: str) -> dict:
         return {}
 
 
+PESO_MAX = {"perro": 200.0, "gato": 50.0, "conejo": 10.0}
 CASO_ALERTA = {
     "consulta": "perro con dolor articular",
     "especie": "perro",
@@ -82,7 +86,7 @@ CASO_NEGATIVA = {
 
 st.set_page_config(page_title="Veterinaria - Dosis seguras", page_icon="🐾", layout="wide")
 st.title("🐾 Clínica Veterinaria — Apoyo de dosis seguras")
-st.caption("ISY0101 EP1 · Groq + Chroma + loop propio · Apoyo clínico, no prescripción")
+st.caption("ISY0101 EP1 · LangChain (ChatGroq) + Chroma + loop propio · Apoyo clínico, no prescripción · Tracing en LangSmith (proyecto ep1-veterinaria)")
 
 with st.sidebar:
     st.header("Configuración")
@@ -92,7 +96,7 @@ with st.sidebar:
     usar_rapido = st.checkbox("Modelo rápido en Groq real (20b)", value=True)
     if st.button("Verificar Groq"):
         try:
-            llm = ClienteGroq(usar_modelo_rapido=True)
+            llm = ClienteLangChain(usar_modelo_rapido=True)
             st.success(f"✓ Groq configurado ({llm.modelo})")
         except Exception as e:
             st.error(f"✗ {e}")
@@ -136,8 +140,10 @@ with col_b:
         especie = st.selectbox("Especie", ["perro", "gato", "conejo"],
                                index=["perro", "gato", "conejo"].index(especie_def)
                                if especie_def in ("perro", "gato", "conejo") else 0)
-    peso = st.number_input("Peso (kg)", min_value=0.1, max_value=200.0, value=peso_def, step=0.1)
-    farmaco = st.selectbox("Fármaco propuesto", farmacos,
+    peso = st.number_input("Peso (kg)", min_value=0.1,
+                               max_value=PESO_MAX.get(especie, 200.0),
+                               value=min(peso_def, PESO_MAX.get(especie, 200.0)), step=0.1)
+    farmaco = st.selectbox("Fármaco propuesto (solo con guía DOS)", farmacos,
                            index=farmacos.index(farmaco_def) if farmaco_def in farmacos else 0)
     meds_txt = st.text_input("Medicamentos actuales extra (coma)",
                              value=st.session_state.get("meds", ""),
@@ -156,7 +162,7 @@ if st.button("🔍 Consultar agente", type="primary", use_container_width=True):
     lineas_previas = len(archivo_trace.read_text(encoding="utf-8").strip().split("\n")) if archivo_trace.exists() else 0
     with st.spinner("Recuperando ficha + dosificación, calculando y verificando..."):
         try:
-            llm = ClienteFalso() if modo_falso else ClienteGroq(usar_modelo_rapido=usar_rapido)
+            llm = ClienteFalso() if modo_falso else ClienteLangChain(usar_modelo_rapido=usar_rapido)
             agente = AgenteVeterinario(llm=llm, trazador=Trazador(None))
             meds = [m.strip() for m in meds_txt.split(",") if m.strip()] or None
             r = agente.planificar(consulta, especie=especie, peso_kg=peso,
@@ -210,4 +216,4 @@ if st.button("🔍 Consultar agente", type="primary", use_container_width=True):
             st.exception(e)
 
 st.divider()
-st.caption("Apoyo clínico, no prescripción. Guía curada de referencia — no sustituye Plumb's ni criterio veterinario. Uso IA declarado: ver README.md §9.")
+st.caption("Apoyo clínico, no prescripción. Guía curada de referencia — no sustituye Plumb's ni criterio veterinario. Uso de IA declarado en el informe.")

@@ -3,7 +3,7 @@
 **Proyecto:** ep1-veterinaria-agente
 **Curso:** ISY0101 Ingeniería de Soluciones con IA — Evaluación Parcial 1 (30%)
 **GitHub:** https://github.com/beibanezv
-**Última actualización:** 2026-09-05
+**Última actualización:** 2026-09-10
 
 > Memoria técnica del proyecto. Se actualiza en cada sesión para preservar
 > decisiones, tradeoffs y avance entre entregas. Sirve de bitácora para el
@@ -33,6 +33,8 @@
 | D6 | Repos | Dos repos independientes | Superficie común ~100 líneas (`llm_client` + logger); entrega académica es por repo | Paquete `shared/`, monorepo |
 | D7 | Nombres | `ep1-veterinaria-agente` | Distintivo en GitHub beibanezv (decenas de archivos similares); describe la función (dosis seguras) | `EP1-Veterinaria` |
 | D8 | Orquestación | Loop razonamiento-acción propio (sin LangGraph/CrewAI) | Control total del logging de trazabilidad y de los guardrails de seguridad; la pauta pide mostrar el loop explícito | LangGraph (visto en curso; capa extra innecesaria para 1 agente) |
+| D9 | Interfaz demo | CLI + notebook + Streamlit `app.py` (solo demo) | La pauta no exige UI; Streamlit es formulario delgado sobre `planificar()` con los 2 casos del guion, modo `--falso` por defecto y peso máximo dinámico por especie | Solo CLI |
+| D10 | LangChain / LangSmith | `ClienteLangChain` (ChatGroq vía langchain-groq) por defecto + `agent/observabilidad.py` activo | Mismo contrato `completar()`; `planificar()` con `@traceable`; tracing al proyecto `ep1-veterinaria` si hay `LANGSMITH_API_KEY` en `.env`, si no es no-op; tests/evals con tracing apagado | LangGraph / tracing obligatorio |
 
 Convencion de commits: mensajes simples y en espanol durante todo el semestre.
 
@@ -67,16 +69,21 @@ ep1-veterinaria-agente/
 │   └── external/interacciones.json (8 pares fármaco con severidad y nota)
 ├── ingestion/ingest.py           carga → chunk → embed → Chroma (30 docs)
 ├── agent/
-│   ├── llm_client.py             interfaz intercambiable, Groq default
+│   ├── llm_client.py             ClienteGroq + ClienteFalso + ClienteLangChain
 │   ├── reasoning_loop.py         loop razonamiento-acción + guardrails post-LLM
 │   ├── prompts.py
+│   ├── retriever.py              lee EMBEDDING_MODEL del .env, error amable si falta colección
+│   ├── validacion.py             validación pre-loop (especie/peso/ficha/fármaco)
+│   ├── observabilidad.py         init_langsmith opt-in + decorador traceable no-op
 │   └── trace.py                  log JSONL de trazabilidad
 ├── tools/
 │   ├── dose_calculator.py        mg/kg × peso → rango, validado vs fuente
 │   └── interaction_checker.py    cruza medicamento propuesto vs actuales
 ├── main.py                       CLI: caso → recomendación con cita o alerta
+├── app.py                        Streamlit demo (peso máx dinámico por especie)
 ├── notebooks/demo.ipynb          4 casos de demostración con ClienteFalso
 ├── tests/
+│   ├── conftest.py               sys.path raíz (pytest desde cualquier cwd)
 │   ├── eval_dataset.json         14 casos con resultado esperado
 │   └── eval_agent.py             corre evals y reporta % de aciertos
 └── docs/                         informe y diagramas (Fase 6)
@@ -88,7 +95,8 @@ ep1-veterinaria-agente/
 - [x] Fase 1 — Datos simulados (12 fichas + 18 entradas dosificación + 8 interacciones) + ingesta + índice Chroma (30 docs, verificación 6/6)
 - [x] Fase 2 — llm_client.py + prompts veterinarios + respuesta base con citas [F#]/[T#]
 - [x] Fase 3 — Tools dosis/interacciones + loop razonamiento-acción + trace.jsonl (tests 7/7)
-- [x] Fase 4 — Guardrails en código: negativa sin fuente reemplaza texto del LLM; alerta severa anteponida (tests 11/11)
+- [x] Fase 4 — Guardrails en código: negativa sin fuente reemplaza texto del LLM; alerta severa anteponida (tests de guardrails 4/4)
+- [x] Fase 4b — Validación pre-loop bloqueante (especie/peso/ficha/fármaco) + interacciones moderadas/leves antepuestas al texto final (suite total 13/13)
 - [x] Fase 5 — Evals: 14 casos (4 alertas, 4 sin información suficiente), 14/14 = 100% ≥ meta 85%
 - [x] Fase 6 — README completo + diagrama Mermaid + CLI + notebooks/demo.ipynb
 
@@ -130,3 +138,23 @@ ep1-veterinaria-agente/
   3. `& ".venv\Scripts\python.exe" -m pytest -q` → 11/11 y `& ".venv\Scripts\python.exe" -m tests.eval_agent` → 14/14 (100%) como evidencia cuantitativa.
   `--pasos` muestra el trace de la corrida (trazabilidad en vivo). Los casos del
   prototipo ecoturismo están en el agents.md del repo gemelo.
+- **2026-09-10** — Corrección pre-entrega: `retriever.py` lee
+  `EMBEDDING_MODEL` del `.env` (antes hardcodeado) con error amable que pide
+  re-correr ingesta; `tests/conftest.py` agregado (pytest desde cualquier
+  cwd); `app.py` con peso máximo dinámico por especie y dropdown solo con
+  fármacos con guía DOS; `agent/observabilidad.py` (LangSmith opt-in, no-op
+  sin key) + `ClienteLangChain` alternativo en `llm_client.py` (D10).
+  Re-verificado: pytest 11/11, evals 14/14.
+- **2026-09-10 (2)** — Revisión externa + fixes: `_buscar_dosificacion`
+  filtra por `farmaco` en metadata (antes post-filtraba el top-4 y podía
+  devolver una negativa falsa); las interacciones moderadas/leves ahora se
+  anteponen al texto final incluso en la negativa (antes se perdían al
+  reemplazar la salida del LLM); la validación pre-loop rechaza fichas
+  `FIC-xxx` inexistentes (antes pasaban y el agente calculaba sin historial).
+  Tests nuevos: 13/13. Evals 14/14.
+- **2026-09-11** — Cableado LangSmith: `ClienteLangChain` por defecto en
+  `main.py`/`app.py` (`--falso` y `--groq-directo` como escapes),
+  `@traceable("planificar")` en el loop, `init_langsmith()` al inicio;
+  tracing apagado en tests/evals (conftest + scripts). Primera corrida real
+  trazada al proyecto `ep1-veterinaria`. Re-verificado: pytest 13/13,
+  evals 14/14.

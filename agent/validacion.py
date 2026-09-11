@@ -1,10 +1,10 @@
 """
-Validación pre-loop bloqueante (Fase 5).
+Validación pre-loop bloqueante (Fase 4b).
 
 Rechaza entradas inválidas ANTES del RAG y del LLM:
 - Especies permitidas: perro, gato, conejo
 - Rangos de peso por especie (kg)
-- Coherencia ficha-vs-input (lee especie real del JSON)
+- Existencia y coherencia ficha-vs-input (lee especie real del JSON)
 - Fármaco no vacío + consulta no vacía
 - Registra entrada_rechazada y devuelve RespuestaVet sin retriever/LLM
 """
@@ -104,13 +104,19 @@ class ValidacionEntrada:
         if not farmaco_norm:
             errores.append("farmaco propuesto es obligatorio")
 
-        # Coherencia ficha-vs-input (solo si especie válida para no encadenar errores)
+        # Existencia + coherencia ficha-vs-input (solo si especie válida para no encadenar errores)
         if paciente_norm:
             if not REGEX_FICHA.fullmatch(paciente_norm):
                 errores.append(f"ficha '{paciente}' con formato inválido. Usar: FIC-XXX (ej: FIC-001)")
             elif especie_valida:
                 especie_ficha = _especie_de_ficha(paciente_norm)
-                if especie_ficha and especie_ficha != especie_norm:
+                if especie_ficha is None:
+                    # Sin este chequeo el agente seguía sin historial y podía
+                    # omitir interacciones/alertas del paciente real.
+                    errores.append(
+                        f"ficha {paciente_norm} no existe en el historial clínico interno"
+                    )
+                elif especie_ficha != especie_norm:
                     errores.append(
                         f"ficha {paciente_norm} corresponde a {especie_ficha}, no a {especie_norm}"
                     )
@@ -124,7 +130,7 @@ class ValidacionEntrada:
             texto = "Solicitud rechazada por entrada inválida:\n"
             for e in errores:
                 texto += f"• {e}\n"
-            texto += "\nCorrigir los errores e intentar de nuevo."
+            texto += "\nCorrige los errores e intenta de nuevo."
             return RespuestaVet(
                 texto=texto,
                 ficha_id=paciente_norm or None,

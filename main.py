@@ -6,14 +6,16 @@ Uso:
     python main.py "perro con dolor" --especie perro --peso 12.3 --farmaco carprofeno --falso
 
 Con --falso usa ClienteFalso (determinista, sin cuota Groq) para probar el
-pipeline completo; sin esa bandera usa ClienteGroq (openai/gpt-oss-120b).
+pipeline completo; por defecto usa ClienteLangChain (ChatGroq via LangChain,
+openai/gpt-oss-120b) con tracing LangSmith si hay LANGSMITH_API_KEY en .env.
 """
 import argparse
 import json
 import sys
 from pathlib import Path
 
-from agent.llm_client import ClienteFalso, ClienteGroq
+from agent.llm_client import ClienteFalso, ClienteGroq, ClienteLangChain
+from agent.observabilidad import init_langsmith
 from agent.reasoning_loop import AgenteVeterinario
 from agent.trace import Trazador
 
@@ -48,9 +50,16 @@ def main() -> int:
     parser.add_argument("--meds", default=None, help="medicamentos actuales separados por coma")
     parser.add_argument("--pasos", action="store_true", help="mostrar cada paso del loop (trace.jsonl)")
     parser.add_argument("--falso", action="store_true", help="usar ClienteFalso determinista (sin cuota Groq)")
+    parser.add_argument("--groq-directo", action="store_true", help="usar ClienteGroq (SDK crudo) en vez de ClienteLangChain")
     args = parser.parse_args()
 
-    llm = ClienteFalso() if args.falso else ClienteGroq()
+    init_langsmith()
+    if args.falso:
+        llm = ClienteFalso()
+    elif args.groq_directo:
+        llm = ClienteGroq()
+    else:
+        llm = ClienteLangChain()
     agente = AgenteVeterinario(llm=llm, trazador=Trazador(None))
     medicamentos = [m.strip() for m in args.meds.split(",") if m.strip()] if args.meds else None
 

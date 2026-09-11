@@ -10,7 +10,7 @@ sugiere una dosis sin fuente**: si el dato no existe para esa especie/fármaco,
 responde "no tengo información suficiente"; si hay interacción, emite alerta
 explícita.
 
-> **Estado:** Fases 0–6 completas. Suite de tests 11/11, evals 14/14 casos
+> **Estado:** Fases 0–6 completas. Suite de tests 13/13, evals 14/14 casos
 > (100%, meta ≥85%). Decisiones técnicas y bitácora en
 > [`agents.md`](agents.md).
 
@@ -18,7 +18,8 @@ explícita.
 
 ```mermaid
 flowchart TD
-    A[Consulta clínica<br/>especie + peso + fármaco + paciente] --> B[Recuperador RAG<br/>ficha del paciente]
+    A[Consulta clínica<br/>especie + peso + fármaco + paciente] --> V[Validación pre-loop<br/>especie/peso/ficha/fármaco]
+    V --> B[Recuperador RAG<br/>ficha del paciente]
     B --> C[Recuperador RAG<br/>entrada de dosificación especie/fármaco]
     C --> D{¿Entrada exacta<br/>en la guía?}
     D -- "no" --> G[Guardrail: negativa<br/>sin información suficiente]
@@ -58,9 +59,10 @@ cp .env.example .env   # pegar GROQ_API_KEY (gratis) de https://console.groq.com
 # 1. Ingesta a ChromaDB (30 documentos, verificación semántica incluida)
 uv run python -m ingestion.ingest
 
-# 2. CLI con el LLM real (Groq)
+# 2. CLI con el LLM real (LangChain/ChatGroq por defecto, con tracing LangSmith)
 uv run python main.py "perro con dolor articular que ya toma meloxicam" \
     --especie perro --peso 24.5 --farmaco carprofeno --paciente FIC-001 --pasos
+# variante SDK crudo: agregar --groq-directo
 
 # 3. CLI determinista (ClienteFalso, sin API key) para demo/CI
 uv run python main.py "gata que ya toma carprofeno" \
@@ -80,7 +82,18 @@ Interfaz web básica (Streamlit, solo para demo/presentación):
 uv run streamlit run app.py
 # Marca "Modo demo determinista" para no usar API key; incluye los 2 casos
 # del guion (alerta severa FIC-001 y negativa gato+carprofeno) como botones.
+# El peso máximo se ajusta por especie (perro 200 / gato 50 / conejo 10 kg).
 ```
+
+## Observabilidad (LangChain / LangSmith, activo)
+
+- `agent/llm_client.py` incluye `ClienteLangChain` (ChatGroq vía
+  `langchain-groq`) con el mismo contrato `completar()`; el CLI y la UI
+  lo usan por defecto (`--falso` = ClienteFalso, `--groq-directo` = SDK crudo).
+- `agent/observabilidad.py` activa LangSmith si `.env` tiene
+  `LANGSMITH_API_KEY` (proyecto `ep1-veterinaria`, ver en
+  https://smith.langchain.com/); sin key es no-op. Tests/evals llevan
+  tracing apagado (conftest + scripts) para no contaminar el proyecto.
 
 ## Guardrails de seguridad (Fase 4, en código)
 
@@ -92,8 +105,12 @@ Verificación post-LLM en `agent/reasoning_loop.py`, no solo en el prompt:
 2. **Alerta severa anteponida:** si hay interacción severa, se antepone un
    encabezado `ALERTA DE INTERACCION SEVERA...` con la nota clínica y la
    advertencia de no administrar sin supervisión (`alerta_severa_anteponida`).
+3. **Interacciones moderadas/leves antepuestas:** se agrega un aviso
+   `INTERACCIONES A VIGILAR...` con severidad y nota
+   (`interacciones_no_severas_antepuestas`), incluso cuando la respuesta se
+   reemplaza por la negativa, para no perder la advertencia.
 
-## Validación pre-loop (Fase 5, bloqueante)
+## Validación pre-loop (Fase 4b, bloqueante)
 
 Validación de entrada en `agent/validacion.py` que se ejecuta **antes** de
 cualquier RAG o llamada al LLM:
@@ -105,9 +122,9 @@ cualquier RAG o llamada al LLM:
    - gato: `[0.1, 50.0]`
    - conejo: `[0.1, 10.0]`
    Los pesos fuera del rango son rechazados.
-3. **Coherencia ficha-vs-input:** si se provee un ID de ficha `FIC-xxx` que
-   corresponde a otra especie, se rechaza para evitar mezclas (p. ej. FIC-001
-   es perro y no gato).
+3. **Existencia y coherencia ficha-vs-input:** un ID de ficha `FIC-xxx`
+   inexistente se rechaza, y si corresponde a otra especie también (p. ej.
+   FIC-001 es perro y no gato); así el agente nunca calcula sin historial.
 4. **Fármaco obligatorio:** un farmaco vacío o nulo es rechazado.
 5. **Salida:** el agente devuelve un `RespuestaVet` con `sin_informacion=True`,
    `guardrails=["validacion_pre_loop"]` y un mensaje de texto de rechazo sin

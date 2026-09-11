@@ -14,6 +14,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 from agent.llm_client import ClienteLLM
+from agent.observabilidad import traceable
 from agent.prompts import SISTEMA_BASE, armar_usuario
 from agent.retriever import Fragmento, Recuperador
 from agent.trace import Trazador
@@ -50,22 +51,36 @@ def _aplicar_guardrails(
 ) -> tuple[str, list[str]]:
     """Guardrails en codigo post-LLM (Fase 4): no se confia solo en el prompt.
 
+    - interacciones severas -> encabezado de alerta antepuesto.
+    - interacciones moderadas/leves -> aviso antepuesto (tambien cuando hay
+      negativa, para no perder la advertencia al reemplazar el texto del LLM).
     - sin_informacion -> reemplaza el texto por una negativa sin cifras.
-    - alerta_severa -> antepone la alerta explicita a la respuesta final.
     """
     aplicados: list[str] = []
     severas = [i for i in interacciones if i.severidad == "severa"]
-    encabezado = ""
+    no_severas = [i for i in interacciones if i.severidad != "severa"]
+    bloques: list[str] = []
     if alerta_severa and severas:
         notas = " ".join(
             f"{i.farmaco_propuesto} + {i.farmaco_actual}: {i.nota}" for i in severas
         )
-        encabezado = (
+        bloques.append(
             f"ALERTA DE INTERACCION SEVERA entre {farmaco} y los medicamentos "
             f"actuales del paciente. {notas} No administrar sin supervision "
-            "veterinaria directa.\n\n"
+            "veterinaria directa."
         )
         aplicados.append("alerta_severa_anteponida")
+    if no_severas:
+        notas = " ".join(
+            f"{i.farmaco_propuesto} + {i.farmaco_actual} ({i.severidad}): {i.nota}"
+            for i in no_severas
+        )
+        bloques.append(
+            f"INTERACCIONES A VIGILAR entre {farmaco} y los medicamentos actuales "
+            f"del paciente. {notas}"
+        )
+        aplicados.append("interacciones_no_severas_antepuestas")
+    encabezado = ("\n\n".join(bloques) + "\n\n") if bloques else ""
     if sin_informacion:
         aplicados.append("negativa_sin_informacion")
         return encabezado + TEXTO_SIN_INFORMACION, aplicados
@@ -101,9 +116,18 @@ def _buscar_ficha(recuperador: Recuperador, consulta: str, paciente: str) -> tup
 
 
 def _buscar_dosificacion(recuperador: Recuperador, especie: str, farmaco: str) -> Fragmento | None:
-    filtro = {"$and": [{"tipo": "dosificacion"}, {"especie": especie.lower()}]}
+    farmaco_norm = farmaco.strip().lower()
+    # El filtro por metadata exige la coincidencia exacta especie/farmaco antes
+    # de rankear: sin el, un farmaco fuera del top-k devolvia una negativa falsa.
+    filtro = {
+        "$and": [
+            {"tipo": "dosificacion"},
+            {"especie": especie.lower()},
+            {"farmaco": farmaco_norm},
+        ]
+    }
     for f in recuperador.buscar(f"{especie} {farmaco} dosis mg por kg", k=4, filtro=filtro):
-        if f.metadata.get("farmaco", "").lower() == farmaco.lower():
+        if f.metadata.get("farmaco", "").lower() == farmaco_norm:
             return f
     return None
 
@@ -124,6 +148,7 @@ class AgenteVeterinario:
     def _extraer_fuentes(self, texto: str) -> list[str]:
         return sorted(set(REGEX_FUENTES.findall(texto)), key=lambda m: (m[1], int(m[2:-1])))
 
+    @traceable("planificar")
     def planificar(
         self,
         consulta: str,

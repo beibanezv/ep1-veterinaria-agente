@@ -77,3 +77,23 @@ class ClienteFalso(ClienteLLM):
         else:
             texto = "(respuesta simulada) No tengo informacion suficiente en la base de conocimiento interna."
         return RespuestaLLM(texto=texto, modelo=self.modelo)
+
+
+class ClienteLangChain(ClienteLLM):
+    """Mismo contrato, via langchain-groq (lazy import; tracing LangSmith si hay key)."""
+
+    def __init__(self, modelo: str = "", usar_modelo_rapido: bool = False):
+        self.modelo = modelo or (MODELO_RAPIDO if usar_modelo_rapido else MODELO_DEFECTO)
+
+    def completar(self, sistema: str, usuario: str) -> RespuestaLLM:
+        from langchain_core.messages import HumanMessage, SystemMessage
+        from langchain_groq import ChatGroq
+
+        try:
+            from agent.observabilidad import init_langsmith
+            init_langsmith()
+        except ImportError:
+            pass
+        chat = ChatGroq(model=self.modelo, temperature=0.2, max_tokens=1024)
+        r = chat.invoke([SystemMessage(content=sistema), HumanMessage(content=usuario)])
+        return RespuestaLLM(texto=str(r.content).strip(), modelo=self.modelo)

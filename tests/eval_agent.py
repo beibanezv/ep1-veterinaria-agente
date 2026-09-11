@@ -2,10 +2,15 @@
 
 Uso:  python -m tests.eval_agent
 """
+import os
 import sys
 from dataclasses import dataclass
 import json
 from pathlib import Path
+
+# Evals deterministas con ClienteFalso: sin tracing LangSmith.
+os.environ["LANGSMITH_TRACING"] = "false"
+os.environ["LANGCHAIN_TRACING_V2"] = "false"
 
 RAIZ = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(RAIZ))
