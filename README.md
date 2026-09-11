@@ -1,157 +1,77 @@
-# EP1 — Agente de Dosis Seguras para Clínica Veterinaria
+# Agente de Dosis Seguras — Clínica Veterinaria
 
-**ISY0101 · Ingeniería de Soluciones con IA · Evaluación Parcial 1 (30%)**
+**ISY0101 · Ingeniería de Soluciones con IA · Evaluación Parcial 1**
 
-Agente LLM + RAG que asiste a una clínica veterinaria pequeña (sin
-especialista de respaldo): recupera la ficha del paciente y la guía de
-dosificación, calcula el rango seguro según peso, verifica interacciones con
-los medicamentos actuales y responde citando la fuente exacta. **Nunca
-sugiere una dosis sin fuente**: si el dato no existe para esa especie/fármaco,
-responde "no tengo información suficiente"; si hay interacción, emite alerta
-explícita.
+Programa que apoya a una clínica veterinaria pequeña a calcular dosis seguras
+y detectar interacciones antes de recetar. Dada una consulta (especie, peso,
+fármaco propuesto y paciente), el agente busca la ficha del paciente y la guía
+de dosificación, calcula el rango seguro según el peso, revisa interacciones
+con los medicamentos actuales y responde citando la fuente exacta.
 
-> **Estado:** Fases 0–6 completas. Suite de tests 17/17, evals 14/14 casos
-> (100%, meta ≥85%). Decisiones técnicas y bitácora en
-> [`agents.md`](agents.md).
+Regla principal: **si el dato no existe para esa especie y fármaco, dice que
+no tiene información suficiente en vez de inventar una cifra**. Si detecta una
+interacción, muestra una alerta explícita.
 
-## Pipeline (loop razonamiento-acción)
+## Cómo funciona
 
-```mermaid
-flowchart TD
-    A[Consulta clínica<br/>especie + peso + fármaco + paciente] --> V[Validación pre-loop<br/>especie/peso/ficha/fármaco]
-    V --> B[Recuperador RAG<br/>ficha del paciente]
-    B --> C[Recuperador RAG<br/>entrada de dosificación especie/fármaco]
-    C --> D{¿Entrada exacta<br/>en la guía?}
-    D -- "no" --> G[Guardrail: negativa<br/>sin información suficiente]
-    D -- sí --> E[Tool: dose_calculator<br/>mg/kg × peso → rango]
-    E --> F[Tool: interaction_checker<br/>fármaco propuesto vs actuales]
-    F --> H{¿Interacción?}
-    H -- sí --> I[Alerta explícita<br/>severa/moderada/leve]
-    H -- no --> J[LLM con contexto<br/>+ citas F# / T#]
-    I --> J
-    J --> K[Guardrails post-LLM<br/>en código]
-    G --> K
-    K --> L[Respuesta final<br/>+ trace.jsonl]
-```
+1. Valida la entrada (especie, peso, ficha del paciente, fármaco).
+2. Recupera la ficha del paciente y la entrada de dosificación (búsqueda
+   semántica sobre base local ChromaDB).
+3. Calcula el rango de dosis (mg/kg × peso) y verifica interacciones.
+4. Responde con la recomendación, el rango calculado y la cita de la guía.
+5. Todo queda registrado en `logs/trace.jsonl` para trazabilidad.
 
-Cada paso queda registrado en `logs/trace.jsonl` (JSONL con paso, tipo de
-evento y hora UTC): trazabilidad completa de qué fuente se usó y qué
-herramienta se ejecutó.
+Si la consulta no tiene relación con veterinaria, el programa lo indica y no
+entrega dosis.
 
 ## Datos
 
-| Colección | Origen | Contenido |
-|---|---|---|
-| Interna (RAG 1) | `data/internal/fichas/` | 12 fichas clínicas FIC-001..012 (5 perro, 4 gato, 3 conejo): peso, edad, medicamentos actuales, alergias |
-| Externa (RAG 2) | `data/external/dosificacion/` | 18 entradas DOS-001..018 (7 perro, 6 gato, 5 conejo): mg/kg min-max, frecuencia, vía, fuente bibliográfica |
-| Tools | `data/external/interacciones.json` | 8 pares de fármacos con severidad (severa/moderada/leve) y nota clínica |
+- `data/internal/fichas/`: 12 fichas clínicas (perro, gato, conejo).
+- `data/external/dosificacion/`: 18 entradas de guía (mg/kg, frecuencia, vía).
+- `data/external/interacciones.json`: 8 pares de fármacos con severidad.
 
-Incluye **huecos deliberados** (p. ej. carprofeno-gato, amoxicilina-conejo) para
-probar el guardrail de negativa: el agente debe decir "no tengo información
-suficiente" en vez de inventar una cifra.
+## Cómo ejecutarlo
 
-## Cómo correr
+Requisitos: Python 3.13, [uv](https://docs.astral.sh/uv/) y una API key
+gratuita de [Groq](https://console.groq.com).
 
 ```bash
 uv sync
-cp .env.example .env   # pegar GROQ_API_KEY (gratis) de https://console.groq.com
+cp .env.example .env   # pegar la GROQ_API_KEY dentro del .env
 
-# 1. Ingesta a ChromaDB (30 documentos, verificación semántica incluida)
+# 1. Cargar los datos a la base local
 uv run python -m ingestion.ingest
 
-# 2. CLI con el LLM real (LangChain/ChatGroq por defecto, con tracing LangSmith)
+# 2. Consultar (usa el modelo de Groq)
 uv run python main.py "perro con dolor articular que ya toma meloxicam" \
-    --especie perro --peso 24.5 --farmaco carprofeno --paciente FIC-001 --pasos
-# variante SDK crudo: agregar --groq-directo
+    --especie perro --peso 24.5 --farmaco carprofeno --paciente FIC-001
 
-# 3. CLI determinista (ClienteFalso, sin API key) para demo/CI
-uv run python main.py "gata que ya toma carprofeno" \
+# 3. Modo demo (respuestas fijas, sin gastar API)
+uv run python main.py "gato con dolor" \
     --especie gato --peso 5.8 --farmaco carprofeno --paciente FIC-005 --falso
 
-# 4. Tests y evals
+# 4. Correr las pruebas
 uv run python -m pytest -q
 uv run python -m tests.eval_agent
 ```
 
-Notebook de demostración con 4 casos (alerta severa, dosis normal, negativa
-sin fuente, alerta moderada): `notebooks/demo.ipynb`.
-
-Interfaz web básica (Streamlit, solo para demo/presentación):
+Interfaz web simple para la demostración:
 
 ```bash
 uv run streamlit run app.py
-# Marca "Modo demo determinista" para no usar API key; incluye los 2 casos
-# del guion (alerta severa FIC-001 y negativa gato+carprofeno) como botones.
-# El peso máximo se ajusta por especie (perro 200 / gato 50 / conejo 10 kg).
 ```
 
-## Observabilidad (LangChain / LangSmith, activo)
+Cuaderno con ejemplos paso a paso: `notebooks/demo.ipynb`.
 
-- `agent/llm_client.py` incluye `ClienteLangChain` (ChatGroq vía
-  `langchain-groq`) con el mismo contrato `completar()`; el CLI y la UI
-  lo usan por defecto (`--falso` = ClienteFalso, `--groq-directo` = SDK crudo).
-- `agent/observabilidad.py` activa LangSmith si `.env` tiene
-  `LANGSMITH_API_KEY` (proyecto `ep1-veterinaria`, ver en
-  https://smith.langchain.com/); sin key es no-op. Tests/evals llevan
-  tracing apagado (conftest + scripts) para no contaminar el proyecto.
+## Pruebas
 
-## Guardrails de seguridad (Fase 4, en código)
+- 17 pruebas automatizadas (`tests/`), todas pasando.
+- 14 casos de evaluación (`tests/eval_dataset.json`): cálculo de dosis,
+  alertas por interacción, casos sin información y citas. Resultado: 14/14.
 
-Verificación post-LLM en `agent/reasoning_loop.py`, no solo en el prompt:
+## Notas
 
-1. **Negativa sin fuente:** si no existe entrada exacta especie/fármaco en la
-   guía, el texto del LLM se **reemplaza** por una negativa estándar sin
-   cifras (`negativa_sin_informacion` en trace).
-2. **Alerta severa anteponida:** si hay interacción severa, se antepone un
-   encabezado `ALERTA DE INTERACCION SEVERA...` con la nota clínica y la
-   advertencia de no administrar sin supervisión (`alerta_severa_anteponida`).
-3. **Interacciones moderadas/leves antepuestas:** se agrega un aviso
-   `INTERACCIONES A VIGILAR...` con severidad y nota
-   (`interacciones_no_severas_antepuestas`), incluso cuando la respuesta se
-   reemplaza por la negativa, para no perder la advertencia.
-
-## Validación pre-loop (Fase 4b, bloqueante)
-
-Validación de entrada en `agent/validacion.py` que se ejecuta **antes** de
-cualquier RAG o llamada al LLM:
-
-1. **Especies permitidas:** `perro`, `gato`, `conejo`. Cualquier otro valor es
-   rechazado de inmediato.
-2. **Rangos de peso por especie (kg):**
-   - perro: `[0.1, 200.0]`
-   - gato: `[0.1, 50.0]`
-   - conejo: `[0.1, 10.0]`
-   Los pesos fuera del rango son rechazados.
-3. **Existencia y coherencia ficha-vs-input:** un ID de ficha `FIC-xxx`
-   inexistente se rechaza, y si corresponde a otra especie también (p. ej.
-   FIC-001 es perro y no gato); así el agente nunca calcula sin historial.
-4. **Fármaco obligatorio:** un farmaco vacío o nulo es rechazado.
-5. **Salida:** el agente devuelve un `RespuestaVet` con `sin_informacion=True`,
-   `guardrails=["validacion_pre_loop"]` y un mensaje de texto de rechazo sin
-   ejecutar RAG ni LLM. Esto evita costos innecesarios y protege contra
-   entradas que el agente no podría manejar con seguridad.
-
-La validación registra `entrada_rechazada` en el trace.jsonl para auditoría
-y permite diagnóstico inmediato sin lanzar herramientas.
-
-## Evals (Fase 5)
-
-`tests/eval_dataset.json` con 14 casos: cálculo de dosis por especie/peso,
-alertas severas (AINE+AINE, AINE+corticosteroide), moderadas y leves,
-negativas por dato inexistente y verificación de citas. Corre con
-`ClienteFalso` (reproducible, sin cuota de API):
-
-```
-Evals: 14/14 casos OK (100%) | meta >= 85%
-```
-
-## Limitaciones
-
-- La guía de dosificación es un dataset curado de referencia para el prototipo
-  (fuente citada en cada entrada); NO sustituye a Plumb's Veterinary Drug
-  Handbook ni a la ficha técnica vigente. La salida es apoyo para un
-  veterinario, no una prescripción.
-- Cuota Groq (200k tokens/día): usar `GROQ_MODEL_FAST` (20b) en dev y evals.
-- La validación pre-loop no reemplaza la supervisión veterinaria; evita que
-  el agente procese casos que no tiene datos para responder, pero el
-  profesional debe confirmar siempre la dosis.
+- La guía de dosificación es un conjunto de referencia armado para este
+  prototipo; no reemplaza un formulario oficial ni la ficha técnica vigente.
+  La salida es apoyo para un veterinario, no una prescripción.
+- Informe del proyecto en `docs/EP1_ISY0101_Informe.docx`.
