@@ -23,6 +23,9 @@ class Fragmento:
     tipo: str
     fuente: str
     metadata: dict = field(default_factory=dict)
+    # Distancia del embedding a la consulta (menor = mas similar).
+    # None si Chroma no la devolvio. Puerta fuera-de-dominio (D11).
+    score: float | None = None
 
 
 class Recuperador:
@@ -42,10 +45,11 @@ class Recuperador:
             query_texts=[consulta],
             n_results=k,
             where=filtro,
-            include=["documents", "metadatas"],
+            include=["documents", "metadatas", "distances"],
         )
+        distancias = r.get("distances", [[None] * len(r["documents"][0])])[0]
         fragmentos: list[Fragmento] = []
-        for doc, meta in zip(r["documents"][0], r["metadatas"][0]):
+        for doc, meta, dist in zip(r["documents"][0], r["metadatas"][0], distancias):
             fuente = meta.get("paciente_id") or meta.get("entrada_id") or meta.get("nombre", "?")
             fragmentos.append(
                 Fragmento(
@@ -54,6 +58,7 @@ class Recuperador:
                     tipo=meta.get("tipo", "?"),
                     fuente=fuente,
                     metadata=dict(meta),
+                    score=float(dist) if dist is not None else None,
                 )
             )
         return fragmentos

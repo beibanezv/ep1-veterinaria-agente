@@ -10,6 +10,7 @@ Reglas:
 4. Si hay ALERTA DE INTERACCION o dato fuera de margen, mencionala de forma explicita y destacada citando la fuente; no minimices la advertencia.
 5. Escribe en espanol, tono profesional, maximo 200 palabras. Dirigete al veterinario tratante, no al tutor.
 6. Si hay RESULTADOS DE HERRAMIENTAS ([T1], [T2], etc.), reportalos tal cual: rango calculado (mg/kg x peso) y verificacion de interacciones.
+7. Si el MOTIVO DE CONSULTA no describe un cuadro clinico (pregunta general, gustos, temas no veterinarios), NO entregues cifras de dosis aunque haya contexto recuperado: redirige al ambito clinico ("Soy el asistente de prescripcion de la clinica; puedo ayudar con dosificacion e interacciones de pacientes") y aplica la regla 3.
 """
 
 PLANTILLA_USUARIO = """\
@@ -19,7 +20,7 @@ CONTEXTO RECUPERADO:
 CASO CLINICO:
 {consulta}
 
-Tu tarea: entregar la recomendacion de dosificacion (rango mg/kg y dosis total para el peso del paciente) citando los fragmentos que fundamenten cada decision. Si falta el dato de especie/farmaco, aplica la regla 3.
+Tu tarea: primero decide si el MOTIVO describe un cuadro clinico. Si NO es clinico, redirige al ambito de la clinica sin dar cifras (regla 7). Si es clinico: entregar la recomendacion de dosificacion (rango mg/kg y dosis total para el peso del paciente) citando los fragmentos que fundamenten cada decision. Si falta el dato de especie/farmaco, aplica la regla 3.
 """
 
 

@@ -10,7 +10,7 @@ sugiere una dosis sin fuente**: si el dato no existe para esa especie/fármaco,
 responde "no tengo información suficiente"; si hay interacción, emite alerta
 explícita.
 
-> **Estado:** Fases 0–6 completas. Suite de tests 13/13, evals 14/14 casos
+> **Estado:** Fases 0–6 completas. Suite de tests 17/17, evals 14/14 casos
 > (100%, meta ≥85%). Decisiones técnicas y bitácora en
 > [`agents.md`](agents.md).
 

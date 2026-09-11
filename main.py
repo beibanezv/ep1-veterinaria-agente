@@ -53,6 +53,12 @@ def main() -> int:
     parser.add_argument("--groq-directo", action="store_true", help="usar ClienteGroq (SDK crudo) en vez de ClienteLangChain")
     args = parser.parse_args()
 
+    # Consola Windows (cp1252) rompia con respuestas LLM con unicode: UTF-8.
+    try:
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    except Exception:
+        pass
+
     init_langsmith()
     if args.falso:
         llm = ClienteFalso()

@@ -41,6 +41,22 @@ TEXTO_SIN_INFORMACION = (
     "de dosis. Consulte la guia oficial vigente o a un profesional veterinario."
 )
 
+# Puerta fuera-de-dominio (D11 espejo): si ni el mejor fragmento de ficha se
+# parece al motivo de consulta, se redirige sin quemar tools ni LLM.
+# Calibrado 2026-09-11 (formato de _buscar_ficha + filtro paciente): 14 casos
+# validos con top-1 <= 0.65; "perritos o gatitos"/torta/poema >= 0.71.
+# Margen delgado por construccion: la suite de 14 evals lo custodia.
+# Lo que pasa la puerta (p. ej. clinicamente redactado pero ajeno) lo cubre
+# la regla 7 del prompt + la negativa sin cifras del guardrail.
+UMBRAL_FUERA_DE_DOMINIO = 0.68
+
+TEXTO_FUERA_DE_DOMINIO = (
+    "Soy el asistente de prescripcion de la clinica veterinaria y solo puedo "
+    "ayudar con casos clinicos: dosificacion por especie y peso, e "
+    "interacciones con los medicamentos del paciente. Reformula tu consulta "
+    "como un caso clinico (especie, peso, farmaco propuesto)."
+)
+
 
 def _aplicar_guardrails(
     texto: str,
@@ -188,6 +204,17 @@ class AgenteVeterinario:
         ficha, ficha_id = _buscar_ficha(
             self.recuperador, f"{especie} {consulta} ficha del paciente", paciente
         )
+        # Puerta fuera-de-dominio (D11): sin ficha pertinente, redirigir.
+        if ficha is not None and ficha.score is not None and ficha.score > UMBRAL_FUERA_DE_DOMINIO:
+            self.trazador.registrar(
+                "fuera_de_dominio", consulta=consulta, score_top1=ficha.score
+            )
+            return RespuestaVet(
+                texto=TEXTO_FUERA_DE_DOMINIO,
+                sin_informacion=True,
+                guardrails=["fuera_de_dominio"],
+                archivo_trace=self.trazador.archivo,
+            )
         if ficha:
             fragmentos.append(ficha)
             ficha_id = ficha.metadata.get("paciente_id", ficha_id)

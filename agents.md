@@ -158,3 +158,5 @@ ep1-veterinaria-agente/
   tracing apagado en tests/evals (conftest + scripts). Primera corrida real
   trazada al proyecto `ep1-veterinaria`. Re-verificado: pytest 13/13,
   evals 14/14.
+
+- **2026-09-11 (2)** — Estrictez de contexto (D11 espejo): sondas probaron que ni distancia ni overlap lexico separan consultas validas de ajenas (E03/E06/E12/E14 caen del lado lejano); puerta por score de ficha > 0,68 (14 validos <= 0,65; perritos/torta/poema >= 0,71) + regla 7 del prompt reforzada en la plantilla. main.py con stdout UTF-8 (Windows). Tests nuevos (test_dominio.py): 17/17. Evals 14/14.
